@@ -1,0 +1,12 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  language:
+    strict-casts: true
+
+linter:
+  rules:
+    - unawaited_futures
+    - cancel_subscriptions
+    - avoid_void_async
+    - close_sinks
