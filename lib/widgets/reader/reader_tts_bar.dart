@@ -13,6 +13,7 @@ class ReaderTtsBar extends ConsumerWidget {
     required this.currentPage,
     required this.totalPages,
     required this.onClose,
+    this.onExpand,
   });
 
   final ReaderThemeData readerTheme;
@@ -20,6 +21,7 @@ class ReaderTtsBar extends ConsumerWidget {
   final int currentPage;
   final int totalPages;
   final VoidCallback onClose;
+  final VoidCallback? onExpand;
 
   static const List<double> _availableSpeeds = [0.75, 1.0, 1.25, 1.5, 2.0];
 
@@ -108,6 +110,14 @@ class ReaderTtsBar extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  if (onExpand != null)
+                    IconButton(
+                      icon: Icon(Icons.open_in_full_rounded, color: secondaryText, size: 18),
+                      tooltip: 'Open Full Audiobook Screen',
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                      onPressed: onExpand,
+                    ),
                   IconButton(
                     icon: Icon(Icons.close_rounded, color: secondaryText, size: 20),
                     tooltip: 'Close Voice Player',

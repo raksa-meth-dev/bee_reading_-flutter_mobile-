@@ -126,6 +126,34 @@ class TtsService {
     }
   }
 
+  Future<List<Map<String, String>>> getVoices() async {
+    try {
+      final dynamic rawVoices = await _flutterTts.getVoices;
+      if (rawVoices is List) {
+        return rawVoices.map((v) {
+          if (v is Map) {
+            return {
+              'name': v['name']?.toString() ?? 'Voice',
+              'locale': v['locale']?.toString() ?? '',
+            };
+          }
+          return {'name': v.toString(), 'locale': ''};
+        }).toList();
+      }
+    } catch (e) {
+      debugPrint('Error getting voices: $e');
+    }
+    return const [];
+  }
+
+  Future<void> setVoice(Map<String, String> voice) async {
+    try {
+      await _flutterTts.setVoice(voice);
+    } catch (e) {
+      debugPrint('Error setting voice: $e');
+    }
+  }
+
   Future<void> setVolume(double volume) async {
     final double clamped = volume.clamp(0.0, 1.0);
     if (_lastVolume == clamped) return;
@@ -217,6 +245,8 @@ class TtsService {
   }
 
   void dispose() {
-    _flutterTts.stop();
+    try {
+      _flutterTts.stop();
+    } catch (_) {}
   }
 }

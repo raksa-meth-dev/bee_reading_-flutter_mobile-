@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:bee_reading/providers/books_provider.dart';
 import 'package:bee_reading/providers/streak_provider.dart';
+import 'package:bee_reading/screens/audiobook/audiobook_hub_screen.dart';
 import 'package:bee_reading/screens/library_screen.dart';
 import 'package:bee_reading/screens/reader_screen.dart';
 import 'package:bee_reading/theme/app_theme.dart';
@@ -1029,12 +1030,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 children: [
                   _buildHomeContent(streak, allBooks),
                   const LibraryScreen(),
-                  const Center(
-                    child: Text(
-                      'Audiobooks Coming Soon',
-                      style: TextStyle(color: AppTheme.textMuted, fontSize: 16),
-                    ),
-                  ),
+                  const AudiobookHubScreen(),
                   const Center(
                     child: Text(
                       'Profile Coming Soon',

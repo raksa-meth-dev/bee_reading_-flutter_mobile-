@@ -8,6 +8,8 @@ import 'package:bee_reading/models/library_book.dart';
 import 'package:bee_reading/providers/books_provider.dart';
 import 'package:bee_reading/providers/reading_tts_provider.dart';
 import 'package:bee_reading/providers/streak_provider.dart';
+import 'package:bee_reading/screens/audiobook/audiobook_screen.dart';
+import 'package:bee_reading/screens/audiobook/widgets/audiobook_chapters_sheet.dart';
 import 'package:bee_reading/screens/reader/epub_reader_view.dart';
 import 'package:bee_reading/screens/reader/pdf_reader_view.dart';
 import 'package:bee_reading/screens/reader/reader_theme.dart';
@@ -75,12 +77,52 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       }
     });
 
-    // Register TTS auto-advance callback
+    // Register TTS auto-advance and chapter jump callbacks
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _ttsNotifier.onAutoAdvanceRequested = _handleTtsAutoAdvance;
+        _ttsNotifier.onChapterJumpRequested = (chapterOrPage) {
+          final isPdf = widget.book.format.toUpperCase() == 'PDF';
+          if (isPdf) {
+            _pdfController.jumpToPage(chapterOrPage);
+          } else {
+            try {
+              // Convert 1-indexed chapter to 0-indexed PageView index
+              _epubController.jumpToChapter(chapterOrPage > 0 ? chapterOrPage - 1 : 0);
+            } catch (_) {}
+          }
+        };
       }
     });
+  }
+
+  void _openFullAudiobookScreen() {
+    final isPdf = widget.book.format.toUpperCase() == 'PDF';
+    List<ChapterItemData> chapterList = [];
+
+    if (isPdf && _pdfOutlines.isNotEmpty) {
+      chapterList = _pdfOutlines.map((o) => ChapterItemData(
+        index: o.pageNumber,
+        title: o.title.trim().isNotEmpty ? o.title.trim() : 'Page ${o.pageNumber}',
+        subtitle: 'Page ${o.pageNumber}',
+      )).toList();
+    } else if (!isPdf && _epubChapters.isNotEmpty) {
+      chapterList = _epubChapters.map((c) => ChapterItemData(
+        index: c.index + 1,
+        title: c.title.trim().isNotEmpty ? c.title.trim() : 'Chapter ${c.index + 1}',
+        subtitle: 'Chapter ${c.index + 1}',
+      )).toList();
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => AudiobookScreen(
+          book: widget.book,
+          initialChapterIndex: _currentPage,
+          chapters: chapterList,
+        ),
+      ),
+    );
   }
 
   DateTime _lastRecordedReadingTime = DateTime.now();
@@ -968,6 +1010,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
                     currentPage: _currentPage,
                     totalPages: _totalPages,
                     onClose: () => _ttsNotifier.setPlayerVisible(false),
+                    onExpand: _openFullAudiobookScreen,
                   ),
                 ),
               ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:bee_reading/models/library_book.dart';
 import 'package:bee_reading/providers/books_provider.dart';
+import 'package:bee_reading/screens/audiobook/audiobook_screen.dart';
 import 'package:bee_reading/screens/reader_screen.dart';
 import 'package:bee_reading/theme/app_theme.dart';
 import 'package:bee_reading/widgets/cached_book_cover.dart';
@@ -157,18 +158,36 @@ void showBookDetailsModal(BuildContext context, WidgetRef ref, LibraryBook book)
               const SizedBox(height: 24),
               Row(
                 children: [
+                  IconButton(
+                    onPressed: () {
+                      ref.read(booksProvider.notifier).toggleFavorite(book.id);
+                      Navigator.pop(sheetContext);
+                    },
+                    icon: Icon(
+                      book.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                      size: 22,
+                      color: book.isFavorite ? Colors.redAccent : AppTheme.textDark,
+                    ),
+                    tooltip: book.isFavorite ? 'Favorited' : 'Add to Favorites',
+                    style: IconButton.styleFrom(
+                      side: const BorderSide(color: AppTheme.surfaceMuted),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      padding: const EdgeInsets.all(12),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () {
-                        ref.read(booksProvider.notifier).toggleFavorite(book.id);
                         Navigator.pop(sheetContext);
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => AudiobookScreen(book: book),
+                          ),
+                        );
                       },
-                      icon: Icon(
-                        book.isFavorite ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                        size: 18,
-                        color: book.isFavorite ? Colors.redAccent : null,
-                      ),
-                      label: Text(book.isFavorite ? 'Favorited' : 'Favorite'),
+                      icon: const Icon(Icons.headphones_rounded, size: 18),
+                      label: const Text('Audiobook'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppTheme.textDark,
                         side: const BorderSide(color: AppTheme.surfaceMuted),
@@ -177,7 +196,7 @@ void showBookDetailsModal(BuildContext context, WidgetRef ref, LibraryBook book)
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () {
